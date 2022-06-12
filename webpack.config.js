@@ -4,6 +4,7 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const WorkboxWebpackPlugin = require('workbox-webpack-plugin');
+const CopyPlugin = require("copy-webpack-plugin");
 const fs = require('fs-extra')
 
 const isProduction = process.env.NODE_ENV == 'production';
@@ -19,8 +20,8 @@ const pages = fs
 const config = {
   entry: {
     app: [
-        path.resolve(__dirname, 'src/styles/app.scss'),
-        path.resolve(__dirname, 'src/scripts/app.js'),
+      path.resolve(__dirname, 'src/styles/app.scss'),
+      path.resolve(__dirname, 'src/scripts/app.js'),
     ]
   },
   output: {
@@ -36,11 +37,16 @@ const config = {
       filename: `${page.split('.')[0]}.html`,
     })),
 
-
     new MiniCssExtractPlugin(),
 
-    // Add your plugins here
-    // Learn more about plugins from https://webpack.js.org/configuration/plugins/
+    new CopyPlugin({
+      patterns: [
+        {
+          from: path.resolve(__dirname, 'src/images'),
+          to: path.resolve(__dirname, 'dist/images')
+        },
+      ],
+    }),
   ],
   module: {
     rules: [
@@ -60,17 +66,23 @@ const config = {
         test: /\.(eot|svg|ttf|woff|woff2|png|jpg|gif)$/i,
         type: 'asset',
       },
-
-      // Add your rules for custom modules here
-      // Learn more about loaders from https://webpack.js.org/loaders/
+      {
+        test: /\.(gif|png|jpe?g|svg)$/i,
+        exclude: /fonts/,
+        use: [{
+          loader: 'file-loader',
+          options: {
+            name: '[path][name].[ext]',
+          },
+        },],
+      }
     ],
-  },
+  }
 };
 
 module.exports = () => {
   if (isProduction) {
     config.mode = 'production';
-
 
     config.plugins.push(new WorkboxWebpackPlugin.GenerateSW());
 
