@@ -1,20 +1,16 @@
-// Generated using webpack-cli https://github.com/webpack/webpack-cli
-
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const WorkboxWebpackPlugin = require('workbox-webpack-plugin');
 const CopyPlugin = require("copy-webpack-plugin");
-const fs = require('fs-extra')
+const BrowserSyncPlugin = require('browser-sync-webpack-plugin');
+const fs = require('fs-extra');
 
 const isProduction = process.env.NODE_ENV == 'production';
-
-
 const stylesHandler = MiniCssExtractPlugin.loader;
 
 const pages = fs
     .readdirSync(path.resolve(__dirname, 'src/pages'))
-    .filter(fileName => (fileName.endsWith('.html') || fileName.endsWith('.pug')));
+    .filter(fileName => (fileName.endsWith('.html')));
 
 
 const config = {
@@ -26,10 +22,12 @@ const config = {
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
+    clean: true
   },
   devServer: {
-    open: true,
-    host: 'localhost',
+    port: 8080,
+    liveReload: true,
+    watchFiles: ['src/**']
   },
   plugins: [
     ...pages.map(page => new HtmlWebpackPlugin({
@@ -47,6 +45,25 @@ const config = {
         },
       ],
     }),
+
+    new BrowserSyncPlugin(
+        // BrowserSync options
+        {
+          // browse to http://localhost:3000/ during development
+          host: 'localhost',
+          port: 3000,
+          // proxy the Webpack Dev Server endpoint
+          // (which should be serving on http://localhost:3100/)
+          // through BrowserSync
+          proxy: 'http://localhost:8080/'
+        },
+        // plugin options
+        {
+          // prevent BrowserSync from reloading the page
+          // and let Webpack Dev Server take care of this
+          reload: false
+        }
+    ),
   ],
   module: {
     rules: [
@@ -83,9 +100,6 @@ const config = {
 module.exports = () => {
   if (isProduction) {
     config.mode = 'production';
-
-    config.plugins.push(new WorkboxWebpackPlugin.GenerateSW());
-
   } else {
     config.mode = 'development';
   }
