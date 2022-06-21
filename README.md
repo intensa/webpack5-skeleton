@@ -4,12 +4,13 @@
 
 - `src/pages/` the directory for your html page
 - `src/styles/` for storing css and scss style files. We can have any number of nested directories. You need to connect your own style files in the app.scss file
-- `src/styles/` for storing js scripts. You need to connect your own style files in the app.js file
+- `src/scripts/` for storing js scripts. You need to connect your own style files in the app.js file
 - `src/fonts/` for storing fonts
 
 ## Run
 
 `yarn serve` - run develop mode
+
 `yarn build` - build production bundle
 
 ## Heroku deploy
